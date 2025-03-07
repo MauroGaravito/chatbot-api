@@ -39,15 +39,29 @@ async def chat_with_agent(user_message: UserMessage):
         if not OPENAI_API_KEY:
             raise HTTPException(status_code=500, detail="OpenAI API key not found.")
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4o",
+        client = openai.OpenAI(api_key=OPENAI_API_KEY)
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",  # ✅ CAMBIO A gpt-4o-mini
             messages=[
-                {"role": "system", "content": "Eres un asistente australiano amigable, relajado y profesional. Responde con humor ligero y fomenta la conversación natural."},
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an advanced AI consultant for Down Under Solutions (DUS), a company specializing in automation, AI, and process optimization. "
+                        "Your goal is to help users identify inefficiencies, repetitive tasks, or challenges they might not have noticed yet. "
+                        "Instead of just answering questions, you guide the conversation to uncover opportunities where DUS can provide value. "
+                        "Ask questions to understand the user's business, daily tasks, or obstacles. "
+                        "Encourage them to think about manual work, slow processes, customer complaints, or anything that 'just takes too long' to do. "
+                        "Once you identify a problem, offer potential solutions—whether it's AI, automation, custom software, or a new workflow. "
+                        "Speak professionally, clearly, and with an Australian-friendly tone—helpful but never overly pushy. "
+                        "The goal is not just to answer but to discover ways DUS can help their business or workflow."
+                    )
+                },
                 {"role": "user", "content": user_message.message},
             ]
         )
 
-        return {"response": response["choices"][0]["message"]["content"]}
+        return {"response": response.choices[0].message.content}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
